@@ -45,8 +45,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_fpath', '-i', type=str, required=True)
     parser.add_argument('--output_fpath', '-o', type=str, nargs='?', default=None, required=False)
-    parser.add_argument('--output_smooth_fpath', '-r', type=str, nargs='?', default=None, required=False)
-    parser.add_argument('--output_random_fpath', '-r', type=str, nargs='?', default=None, required=False)
+    parser.add_argument('--output_smooth_fpath', type=str, nargs='?', default=None, required=False)
+    parser.add_argument('--output_random_fpath', type=str, nargs='?', default=None, required=False)
     parser.add_argument('--verbose', '-v', action='store_true')
     parser.add_argument('--run_steps', nargs='*', type=int, default=[1,2,3,4], required=False)
 
