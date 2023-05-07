@@ -1,0 +1,11 @@
+.DS_Store
+data/
+notebook/
+plots/
+presentations/
+src/.ipynb_checkpoints/
+src/__pycache__/
+src/.DS_Store
+src/cleaner_ppmi.sh
+src/run_cleaner_ppmi.py
+submission/

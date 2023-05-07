@@ -1,0 +1,30 @@
+name: dipytorch-base
+channels:
+- pytorch
+- conda-forge
+- defaults
+dependencies:
+- python=3.9
+- pytorch::pytorch=2.0.0
+- jupyter=1.0.0
+- scikit-learn
+- scipy
+- seaborn
+- matplotlib
+- nomkl
+- plotly
+- tqdm
+- dipy
+- fury
+- tensorboard
+- torchvision
+- openpyxl
+- umap-learn
+- torchinfo
+- pip
+- pip:
+  - dipy==1.7.0
+  - fury==0.9.0
+  - open3d==0.15.1
+  - chamferdist
+  - robust_laplacian
