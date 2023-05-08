@@ -32,11 +32,11 @@ def run_cleaner(args):
     cleaner =  BundleCleaner(lines)
     cleaner.run(**cleaner_args)
     
-    if args.output_fpath is not None:
+    if args.output_fpath is not None and cleaner.lines_sampled is not None:
         save_bundle(cleaner.lines_sampled, args.input_fpath, args.output_fpath)
-    if args.output_smooth_fpath is not None:
+    if args.output_smooth_fpath is not None and cleaner.lines_smoothed2 is not None:
         save_bundle(cleaner.lines_smoothed2, args.input_fpath, args.output_smooth_fpath)
-    if args.output_random_fpath is not None:
+    if args.output_random_fpath is not None and cleaner.lines_random is not None:
         save_bundle(cleaner.lines_random, args.input_fpath, args.output_random_fpath)
 
     return f"{cleaner.npoints_orig},{cleaner.time_elapsed},{len(cleaner.data)},{len(cleaner.sample_idx)},{cleaner.min_samples_prune},{cleaner.min_samples}"
@@ -48,7 +48,10 @@ def main():
     parser.add_argument('--output_smooth_fpath', type=str, nargs='?', default=None, required=False)
     parser.add_argument('--output_random_fpath', type=str, nargs='?', default=None, required=False)
     parser.add_argument('--verbose', '-v', action='store_true')
-    parser.add_argument('--run_steps', nargs='*', type=int, default=[1,2,3,4], required=False)
+    parser.add_argument('--run_steps', nargs='*', type=int, default=[1,2,3,4], required=False,
+                        help='Specify BundleCleaner steps to run, will override other parameters.')
+    parser.add_argument('--min_lines', '-M', type=int, default=20, required=False, 
+                        help='Minimum number of lines for Laplacian smoothing & sampling')
 
     # Step 1 Pruning args
     parser.add_argument('--resample', type=float, default=0.5, required=False)
@@ -56,7 +59,7 @@ def main():
     parser.add_argument('--prune_min_samples', type=int, nargs='?', default=None, required=False)
     # Step 2 Laplacian smoothing args
     parser.add_argument('--alpha', type=float, default=100.0, required=False)
-    parser.add_argument('--n_neighbors', '-k', type=int, default=30, required=False)
+    parser.add_argument('--n_neighbors', '-k', type=int, default=100, required=False)
     parser.add_argument('--max_iter', type=int, default=2500, required=False)
     # Step 3 Streamline smoothing args
     parser.add_argument('--window_size', type=int, default=5, required=False)

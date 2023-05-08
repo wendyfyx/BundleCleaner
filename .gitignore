@@ -7,5 +7,7 @@ src/.ipynb_checkpoints/
 src/__pycache__/
 src/.DS_Store
 src/cleaner_ppmi.sh
+src/cleaner_adni.sh
 src/run_cleaner_ppmi.py
+src/run_cleaner_adni.py
 submission/

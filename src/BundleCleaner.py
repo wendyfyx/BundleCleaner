@@ -17,21 +17,40 @@ class BundleCleaner:
     def __init__(self, data):
         self.data=data
         self.ptct = [len(i) for i in self.data]
+        self.npoints_orig = len(self.data.get_data())
+
+        self.lines_pruned = None # After step 1
+        self.lines_smoothed = None # After step 2
+        self.lines_smoothed2 = None # After step 3
+        self.lines_sampled = None # After step 4
+        self.lines_random = None # Random sampling
         self.pc_smoothed = None
+
+        self.min_samples_prune = 0
+        self.min_samples = 0
+        self.time_elapsed = 0
+        self.sample_idx = np.arange(len(self.data))
+        self.random_idx = self.sample_idx
         
-    def run(self, prune_threshold=5, prune_min_samples=None, verbose=False, **kwargs):
+    def run(self, prune_threshold=5, prune_min_samples=None, min_lines=20, verbose=False, **kwargs):
         pc = self.data.get_data()
-        self.npoints_orig = len(pc)
         if verbose:
             print(f"Cleaning bundle of size {pc.shape}")
-        
+
+        ## Only run step 3 if there aren't enough lines
+        if len(self.data) < min_lines:
+            self.lines_smoothed2 = BundleCleaner.streamline_smoothing(pc, self.ptct, verbose=verbose, **kwargs)
+            if verbose:
+                print(f"Not enough data ({len(self.data)} lines, {len(pc)} points), only running Step 3.")
+            return
+                
         start = time.time()
         # Step 1 - Pruning
         prune_idx, _, self.min_samples_prune = BundleCleaner.subsampling(self.data, threshold=prune_threshold, 
                                                 min_samples=prune_min_samples, 
                                                 sample_pct=1, verbose=verbose)
         self.lines_pruned = self.data[prune_idx]
-        self.ptct = [len(i) for i in self.lines_pruned]
+        self.ptct = [len(i) for i in self.lines_pruned] # get new point count after pruning
         pc = self.lines_pruned.get_data()
         
         # Step 2 - Laplacian Smoothing
@@ -61,6 +80,7 @@ class BundleCleaner:
             
     @staticmethod
     def laplacian_smoothing(pc, smoothing_a=100, maxiter=2000, n_neighbors=30, verbose=True, **kwargs):
+        '''Point-cloud based smoothing with Laplacian regularization'''
         if smoothing_a <= 0:
             return pc
         L, M = robust_laplacian.point_cloud_laplacian(pc, n_neighbors=n_neighbors)
@@ -79,6 +99,7 @@ class BundleCleaner:
     
     @staticmethod
     def streamline_smoothing(pc, ptct, window_size=10, order=2, verbose=True, **kwargs):
+        '''Streamline based smoothing with Savitsky-Golay filter'''
         lines = pc_to_arraysequence(pc, ptct)
         if window_size <= 0:
             return lines
@@ -89,6 +110,7 @@ class BundleCleaner:
     
     @staticmethod
     def subsampling(lines, threshold=5, min_samples=None, sample_pct=0.5, verbose=True, **kwargs):
+        '''QuickBundles cluster based subsampling'''
         feature = ResampleFeature(nb_points=20)
         metric = AveragePointwiseEuclideanMetric(feature=feature)  # a.k.a. MDF
         qb = QuickBundles(threshold=threshold, metric=metric)
