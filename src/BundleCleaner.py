@@ -75,6 +75,10 @@ class BundleCleaner:
         self.random_idx = random_select(self.data, len(self.sample_idx))
         self.lines_random = self.data[self.random_idx]
 
+        # Save final pruning without subsampling
+        prune_idx2, _, _ = BundleCleaner.subsampling(self.lines_smoothed2, verbose=verbose, **{**kwargs, 'sample_pct': 1})
+        self.lines_pruned2 = self.lines_smoothed2[prune_idx2]
+
         self.time_elapsed = time.time()-start
         print(f"Time elapsed {self.time_elapsed:.3f}.")
             

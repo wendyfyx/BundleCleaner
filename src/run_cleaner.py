@@ -15,7 +15,7 @@ def run_cleaner(args):
         lines = subsample_by_line(lines, percent=args.resample)
         print(f"Subsampled {100*args.resample}% of each line, with total of {len(lines.get_data())} points.")
 
-    cleaner_args = {'prune_threshold' :  args.prune_threshold, 'prune_min_samples' : args.prune_min_samples,
+    cleaner_args = {'prune_threshold' :  args.prune_threshold, 'prune_min_samples' : args.prune_min_samples, 'min_lines' : args.min_lines,
                     'smoothing_a' : args.alpha, 'n_neighbors' : args.n_neighbors, 'maxiter' : args.max_iter,
                     'window_size' : args.window_size, 'order' : args.poly_order,
                     'threshold' : args.threshold, 'min_samples' : args.min_samples, 
@@ -32,21 +32,24 @@ def run_cleaner(args):
     cleaner =  BundleCleaner(lines)
     cleaner.run(**cleaner_args)
     
-    if args.output_fpath is not None and cleaner.lines_sampled is not None:
+    if cleaner.lines_sampled is not None:
         save_bundle(cleaner.lines_sampled, args.input_fpath, args.output_fpath)
-    if args.output_smooth_fpath is not None and cleaner.lines_smoothed2 is not None:
-        save_bundle(cleaner.lines_smoothed2, args.input_fpath, args.output_smooth_fpath)
-    if args.output_random_fpath is not None and cleaner.lines_random is not None:
-        save_bundle(cleaner.lines_random, args.input_fpath, args.output_random_fpath)
+    if args.output_pruned_fpath is not None and cleaner.lines_pruned2 is not None:
+        save_bundle(cleaner.lines_pruned2, args.input_fpath, args.output_pruned_fpath)
+    # if args.output_smooth_fpath is not None and cleaner.lines_smoothed2 is not None:
+    #     save_bundle(cleaner.lines_smoothed2, args.input_fpath, args.output_smooth_fpath)
+    # if args.output_random_fpath is not None and cleaner.lines_random is not None:
+    #     save_bundle(cleaner.lines_random, args.input_fpath, args.output_random_fpath)
 
     return f"{cleaner.npoints_orig},{cleaner.time_elapsed},{len(cleaner.data)},{len(cleaner.sample_idx)},{cleaner.min_samples_prune},{cleaner.min_samples}"
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_fpath', '-i', type=str, required=True)
-    parser.add_argument('--output_fpath', '-o', type=str, nargs='?', default=None, required=False)
-    parser.add_argument('--output_smooth_fpath', type=str, nargs='?', default=None, required=False)
-    parser.add_argument('--output_random_fpath', type=str, nargs='?', default=None, required=False)
+    parser.add_argument('--output_fpath', '-o', type=str, required=True)
+    parser.add_argument('--output_pruned_fpath', type=str, nargs='?', default=None, required=False)
+    # parser.add_argument('--output_smooth_fpath', type=str, nargs='?', default=None, required=False)
+    # parser.add_argument('--output_random_fpath', type=str, nargs='?', default=None, required=False)
     parser.add_argument('--verbose', '-v', action='store_true')
     parser.add_argument('--run_steps', nargs='*', type=int, default=[1,2,3,4], required=False,
                         help='Specify BundleCleaner steps to run, will override other parameters.')
@@ -59,7 +62,7 @@ def main():
     parser.add_argument('--prune_min_samples', type=int, nargs='?', default=None, required=False)
     # Step 2 Laplacian smoothing args
     parser.add_argument('--alpha', type=float, default=100.0, required=False)
-    parser.add_argument('--n_neighbors', '-k', type=int, default=100, required=False)
+    parser.add_argument('--n_neighbors', '-k', type=int, default=50, required=False)
     parser.add_argument('--max_iter', type=int, default=2500, required=False)
     # Step 3 Streamline smoothing args
     parser.add_argument('--window_size', type=int, default=5, required=False)

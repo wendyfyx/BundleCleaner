@@ -1,5 +1,5 @@
 import numpy as np
-import open3d as o3d
+# import open3d as o3d
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from collections import Counter
@@ -17,64 +17,64 @@ from fury.colormap import line_colors
 from fury.utils import map_coordinates_3d_4d
 
 
-def bundle2lineset(bundle, colors=None):
-    '''
-        Convert bundle to lineset object in Open3d
-        Accept numpy array or ArraySequence
-    '''
-    if isinstance(bundle, np.ndarray):
-        points = bundle.reshape(-1, 3)
-        repeat_param = bundle.shape[1]-1
-    elif isinstance(bundle, ArraySequence):
-        points = bundle.get_data()
-        repeat_param = np.array([len(line)-1 for line in bundle])
-    else:
-        print("Unsupported data type.")
-        return
+# def bundle2lineset(bundle, colors=None):
+#     '''
+#         Convert bundle to lineset object in Open3d
+#         Accept numpy array or ArraySequence
+#     '''
+#     if isinstance(bundle, np.ndarray):
+#         points = bundle.reshape(-1, 3)
+#         repeat_param = bundle.shape[1]-1
+#     elif isinstance(bundle, ArraySequence):
+#         points = bundle.get_data()
+#         repeat_param = np.array([len(line)-1 for line in bundle])
+#     else:
+#         print("Unsupported data type.")
+#         return
     
-    edges = []
-    count = 0
-    for i in range(len(bundle)):
-        for j in range(len(bundle[i])-1):
-            edges.append([count+j, count+j+1])
-        count += len(bundle[i])
+#     edges = []
+#     count = 0
+#     for i in range(len(bundle)):
+#         for j in range(len(bundle[i])-1):
+#             edges.append([count+j, count+j+1])
+#         count += len(bundle[i])
         
-    line_set = o3d.geometry.LineSet()
-    line_set.points = o3d.utility.Vector3dVector(points)
-    line_set.lines = o3d.utility.Vector2iVector(edges)
-    if colors is None:
-        colors = line_colors(bundle)
-    if colors=='random':
-        colors = np.array([np.random.rand(3) for si in range(len(bundle))])
-    elif not isinstance(colors, np.ndarray):
-        colors = np.array(colors).reshape(-1, 3)
-        if len(colors)==1:
-            colors = np.tile(colors, (len(bundle), 1))
-    print(colors.shape)
-    colors = np.repeat(colors, repeat_param, axis=0)
-    line_set.colors = o3d.utility.Vector3dVector(colors)
-    return line_set
+#     line_set = o3d.geometry.LineSet()
+#     line_set.points = o3d.utility.Vector3dVector(points)
+#     line_set.lines = o3d.utility.Vector2iVector(edges)
+#     if colors is None:
+#         colors = line_colors(bundle)
+#     if colors=='random':
+#         colors = np.array([np.random.rand(3) for si in range(len(bundle))])
+#     elif not isinstance(colors, np.ndarray):
+#         colors = np.array(colors).reshape(-1, 3)
+#         if len(colors)==1:
+#             colors = np.tile(colors, (len(bundle), 1))
+#     print(colors.shape)
+#     colors = np.repeat(colors, repeat_param, axis=0)
+#     line_set.colors = o3d.utility.Vector3dVector(colors)
+#     return line_set
 
-def bundle2pc(bundle, reshape=True, colors=None):
-    '''
-        Convert bundle to point cloud object in Open3d
-        Accept numpy array or ArraySequence
-    '''
-    if reshape:
-        points = bundle.reshape(-1, 3)
-    else:
-        points = bundle
-    pc = o3d.geometry.PointCloud()
-    pc.points = o3d.utility.Vector3dVector(points)
-    if colors is not None:
-        if colors=='random':
-             colors = [np.random.rand(3) for si in range(len(points))]
-        elif not isinstance(colors, np.ndarray):
-            colors = np.array(colors).reshape(-1, 3)
-            if len(colors)==1:
-                colors = np.tile(colors, (len(points), 1))
-        pc.colors = o3d.utility.Vector3dVector(colors)
-    return pc
+# def bundle2pc(bundle, reshape=True, colors=None):
+#     '''
+#         Convert bundle to point cloud object in Open3d
+#         Accept numpy array or ArraySequence
+#     '''
+#     if reshape:
+#         points = bundle.reshape(-1, 3)
+#     else:
+#         points = bundle
+#     pc = o3d.geometry.PointCloud()
+#     pc.points = o3d.utility.Vector3dVector(points)
+#     if colors is not None:
+#         if colors=='random':
+#              colors = [np.random.rand(3) for si in range(len(points))]
+#         elif not isinstance(colors, np.ndarray):
+#             colors = np.array(colors).reshape(-1, 3)
+#             if len(colors)==1:
+#                 colors = np.tile(colors, (len(points), 1))
+#         pc.colors = o3d.utility.Vector3dVector(colors)
+#     return pc
 
 
 def centroid_mdf(b1, b2, threshold=20):
