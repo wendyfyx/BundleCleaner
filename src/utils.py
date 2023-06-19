@@ -7,8 +7,6 @@ from collections import Counter
 import nibabel as nib
 from nibabel.streamlines.array_sequence import ArraySequence
 from dipy.tracking.streamline import set_number_of_points, transform_streamlines
-from dipy.align.streamlinear import slr_with_qbx
-from dipy.segment.bundles import bundle_adjacency, bundle_shape_similarity
 from dipy.segment.clustering import QuickBundles
 from dipy.segment.metric import mdf
 from dipy.io.streamline import save_tractogram
@@ -85,28 +83,6 @@ def centroid_mdf(b1, b2, threshold=20):
     clt2 = qb2.cluster(b2)
     return mdf(clt1.centroids[0], clt2.centroids[0])
 
-def get_bundle_sm(b1, b2, threshold=None, apply_slr=False, rng=None):
-    '''Compute bundle similarity, set apply_slr=True if they aren't in the same space'''
-    if rng is None:
-        rng=np.random.default_rng(0)
-    elif isinstance(rng, int):
-        rng=np.random.default_rng(rng)
-    
-    if threshold is None:
-        threshold = centroid_mdf(b1, b2)
-    if apply_slr:
-        b2 = slr_with_qbx(b1, b2, rng=rng)[0]
-    if not isinstance(b1, ArraySequence):
-        b1 = ArraySequence(b1)
-    if not isinstance(b2, ArraySequence):
-        b2 = ArraySequence(b2)
-    return bundle_shape_similarity(b1, b2, rng, [0], threshold=threshold)
-
-
-def get_bundle_ba(b1, b2, threshold=3):
-    '''Comute bundle adjacency'''
-    return bundle_adjacency(ArraySequence(b1), ArraySequence(b2), threshold=threshold)
-
 
 def load_nib(fpath):
     '''Load .nii files'''
@@ -123,15 +99,23 @@ def dti2bundle(dti_fpath, lines_org):
     return map_coordinates_3d_4d(dtimap, X_native)
 
 
-def subsample_by_line(lines, percent=0.5):
+def resample_lines_by_percent(lines, percent=0.5, verbose=True):
     '''Subsample each streamline with set percentage'''
+    if verbose:
+        print(f"Resample each streamline to {100*percent}% of points.")
     ptct = [len(l) for l in lines]
     lines = [set_number_of_points(lines[i], int(percent*ptct[i])) for i in range(len(lines))]
     return ArraySequence(lines)
 
 
-def save_bundle(bundle, orig_fpath, new_fpath):
-    print(f"Saving bundle ({len(bundle)}) to {new_fpath}.")
+def resample_lines_by_ptct(lines, ptct, verbose=True):
+    lines = [set_number_of_points(lines[i], ptct[i]) for i in range(len(lines))]
+    return ArraySequence(lines)
+
+
+def save_bundle(bundle, orig_fpath, new_fpath, verbose=True):
+    if verbose:
+        print(f"Saving bundle ({len(bundle)} lines) to {new_fpath}.")
     new_tractogram = StatefulTractogram(bundle, orig_fpath, Space.RASMM)
     save_tractogram(new_tractogram, new_fpath, bbox_valid_check=False)
 
@@ -177,6 +161,7 @@ def random_select(data, n_sample=1, rng=None):
         rng=np.random.default_rng(rng)
     return rng.choice(len(data), size=n_sample, replace=False)
 
+
 def cluster_subsample(labels, sample_pct=0.5, min_samples=2, rng=0):
     '''Subsample from each cluster, and discard clusters smaller than min_samples'''
     if isinstance(rng, int):
@@ -191,6 +176,7 @@ def cluster_subsample(labels, sample_pct=0.5, min_samples=2, rng=0):
             sample_idx = clt_idx[random_select(clt_idx, round(v*sample_pct), rng)]
         new_idx = np.concatenate((new_idx, sample_idx))
     return np.sort(new_idx).astype(int)
+
 
 def qbcluster_labels(clusters):
     '''Helper function for getting labesl from QuickBundles labels'''

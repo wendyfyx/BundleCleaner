@@ -10,5 +10,4 @@ src/cleaner_ppmi.sh
 src/cleaner_adni.sh
 src/run_cleaner_ppmi.py
 src/run_cleaner_adni.py
-src/BundleShape.py
 submission/

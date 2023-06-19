@@ -1,7 +1,7 @@
 import argparse
 from BundleCleaner import BundleCleaner
 from dipy.io.streamline import load_tractogram
-from utils import subsample_by_line, save_bundle
+from utils import resample_lines_by_percent, save_bundle
 
 
 
@@ -12,12 +12,12 @@ def run_cleaner(args):
     print(f"Load {args.input_fpath} with {len(lines)} lines, {len(lines.get_data())} points.")
 
     if args.resample < 1 and args.resample > 0:
-        lines = subsample_by_line(lines, percent=args.resample)
+        lines = resample_lines_by_percent(lines, percent=args.resample)
         print(f"Subsampled {100*args.resample}% of each line, with total of {len(lines.get_data())} points.")
 
     cleaner_args = {'prune_threshold' :  args.prune_threshold, 'prune_min_samples' : args.prune_min_samples, 'min_lines' : args.min_lines,
                     'smoothing_a' : args.alpha, 'n_neighbors' : args.n_neighbors, 'maxiter' : args.max_iter,
-                    'window_size' : args.window_size, 'order' : args.poly_order,
+                    'window_size' : args.window_size, 'poly_order' : args.poly_order,
                     'threshold' : args.threshold, 'min_samples' : args.min_samples, 
                     'sample_pct' : args.sample_pct, 'verbose' : args.verbose}
     if 1 not in args.run_steps:
@@ -33,9 +33,11 @@ def run_cleaner(args):
     cleaner.run(**cleaner_args)
     
     if cleaner.lines_sampled is not None:
-        save_bundle(cleaner.lines_sampled, args.input_fpath, args.output_fpath)
+        lines_sampled = resample_lines_by_percent(cleaner.lines_sampled, percent=float(1)/args.resample)
+        save_bundle(lines_sampled, args.input_fpath, args.output_fpath)
     if args.output_pruned_fpath is not None and cleaner.lines_pruned2 is not None:
-        save_bundle(cleaner.lines_pruned2, args.input_fpath, args.output_pruned_fpath)
+        lines_pruned2 = resample_lines_by_percent(cleaner.lines_pruned2, percent=float(1)/args.resample)
+        save_bundle(lines_pruned2, args.input_fpath, args.output_pruned_fpath)
     # if args.output_smooth_fpath is not None and cleaner.lines_smoothed2 is not None:
     #     save_bundle(cleaner.lines_smoothed2, args.input_fpath, args.output_smooth_fpath)
     # if args.output_random_fpath is not None and cleaner.lines_random is not None:

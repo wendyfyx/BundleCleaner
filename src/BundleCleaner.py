@@ -62,7 +62,7 @@ class BundleCleaner:
                 print(f"Step 2 norm={round(norm1, 3)}")
 
         # Step 3 - Streamline smoothing    
-        self.lines_smoothed2 = BundleCleaner.streamline_smoothing(self.pc_smoothed, self.ptct, verbose=verbose, **kwargs)
+        self.lines_smoothed2 = BundleCleaner.streamline_smoothing(self.lines_smoothed, verbose=verbose, **kwargs)
         if verbose:
             norm2 = scipy.linalg.norm(self.lines_smoothed.get_data()-self.lines_smoothed2.get_data())
             print(f"Step 3 norm={round(norm2, 3)}")
@@ -83,14 +83,14 @@ class BundleCleaner:
         print(f"Time elapsed {self.time_elapsed:.3f}.")
             
     @staticmethod
-    def laplacian_smoothing(pc, smoothing_a=100, maxiter=2000, n_neighbors=30, verbose=True, **kwargs):
+    def laplacian_smoothing(pc, alpha=100, maxiter=2000, n_neighbors=30, verbose=True, **kwargs):
         '''Point-cloud based smoothing with Laplacian regularization'''
-        if smoothing_a <= 0:
+        if alpha <= 0:
             return pc
         L, M = robust_laplacian.point_cloud_laplacian(pc, n_neighbors=n_neighbors)
         if verbose:
-            print(f"- Laplacian smoothing: a={smoothing_a}, maxiter={maxiter}.")
-        A = scipy.sparse.identity(len(pc))+smoothing_a*(L.T@L)
+            print(f"Laplacian smoothing: a={alpha}, maxiter={maxiter}.")
+        A = scipy.sparse.identity(len(pc))+alpha*(L.T@L)
         Vsm = []
         for i in range(3):
             x, exit_code = scipy.sparse.linalg.cg(A, pc[:,i], maxiter=maxiter)
@@ -102,14 +102,13 @@ class BundleCleaner:
         return Vsm
     
     @staticmethod
-    def streamline_smoothing(pc, ptct, window_size=10, order=2, verbose=True, **kwargs):
+    def streamline_smoothing(lines, window_size=10, poly_order=2, verbose=True, **kwargs):
         '''Streamline based smoothing with Savitsky-Golay filter'''
-        lines = pc_to_arraysequence(pc, ptct)
         if window_size <= 0:
             return lines
         if verbose:
-            print(f"- Streamline smoothing: window size={window_size}, order={order}.")
-        lines_smoothed = [savgol_filter(lines[i], window_size, order, axis=0) for i in range(len(lines))]
+            print(f"Streamline smoothing: window size={window_size}, order={poly_order}.")
+        lines_smoothed = [savgol_filter(lines[i], window_size, poly_order, axis=0) for i in range(len(lines))]
         return ArraySequence(lines_smoothed)
     
     @staticmethod
@@ -126,5 +125,5 @@ class BundleCleaner:
             min_samples = min(min_samples, 100)
         sample_idx = cluster_subsample(labels, sample_pct=sample_pct, min_samples=min_samples)
         if verbose:
-            print(f'- Subsampled {len(sample_idx)} from {len(labels)} streamlines with min_samples={min_samples}.')
+            print(f'Subsampled {len(sample_idx)} from {len(labels)} streamlines with threshold={threshold} and min_samples={min_samples}.')
         return sample_idx, labels, min_samples
