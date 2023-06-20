@@ -103,8 +103,8 @@ class BundleCleanerV2:
         self.lines_out = lines_out # don't resample back in case we want to 
         if out_suffix is not None:
             if keep_same:
-                lines_out = resample_lines_by_percent(lines_out, percent=float(1)/self.resample_rate)
-            save_bundle(lines_out, self.input_fpath, f"{self.output_fpath[:-4]}{out_suffix}.trk", verbose=self.verbose)
+                self.lines_out = resample_lines_by_percent(lines_out, percent=float(1)/self.resample_rate)
+            save_bundle(self.lines_out, self.input_fpath, f"{self.output_fpath[:-4]}{out_suffix}.trk", verbose=self.verbose)
         return self
         
 
@@ -156,17 +156,33 @@ class BundleCleanerV2:
         start = time.time()
 
         if len(self.lines_orig) < args.min_lines: # Only apply step 3 streamline based smoothing for small bundles
-            self.step3(args.window_size, args.poly_order, out_suffix="_cleaned")
+            self.step3(args.window_size, args.poly_order, keep_same=args.keep_same, out_suffix="_cleaned")
         else: # Define main pipeline
             self.step1(args.resample, args.prune_threshold, args.prune_min_samples, out_suffix=None) \
                 .step2(args.alpha, args.maxiter, args.n_neighbors, out_suffix=None) \
-                .step3(args.window_size, args.poly_order, out_suffix=None) \
-                .step4(args.threshold, args.min_samples, args.sample_pct, 
+                .step3(args.window_size, args.poly_order, keep_same=False, out_suffix=None) \
+                .step4(args.threshold, args.min_samples, args.sample_pct, keep_same=args.keep_same,
                     out_suffix="_cleaned", out_suffix_pruned="_pruned", out_suffix_random=None)
         
         self.time_elapsed = time.time()-start
         print(f"Total time elapsed {self.time_elapsed:.3f}.")
 
+    def run2(self, args):
+        '''Define BundleCleaner pipeline, save at every step'''
+
+        start = time.time()
+
+        if len(self.lines_orig) < args.min_lines: # Only apply step 3 streamline based smoothing for small bundles
+            self.step3(args.window_size, args.poly_order, keep_same=args.keep_same, out_suffix="step3")
+        else: # Define main pipeline
+            self.step1(args.resample, args.prune_threshold, args.prune_min_samples, out_suffix='_step1') \
+                .step2(args.alpha, args.maxiter, args.n_neighbors, out_suffix='_step2') \
+                .step3(args.window_size, args.poly_order, keep_same=False, out_suffix='_step3') \
+                .step4(args.threshold, args.min_samples, args.sample_pct, keep_same=args.keep_same,
+                    out_suffix="_step4_cleaned", out_suffix_pruned="_step4_pruned", out_suffix_random='_random')
+        
+        self.time_elapsed = time.time()-start
+        print(f"Total time elapsed {self.time_elapsed:.3f}.")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -184,7 +200,7 @@ def main():
     parser.add_argument('--prune_min_samples', type=int, nargs='?', default=None, required=False)
     # Step 2 args
     parser.add_argument('--alpha', type=float, default=100.0, required=False)
-    parser.add_argument('--maxiter', type=int, default=2500, required=False)
+    parser.add_argument('--maxiter', type=int, default=5000, required=False)
     parser.add_argument('--n_neighbors', type=int, default=50, required=False)
     # Step 3 args
     parser.add_argument('--window_size', type=int, default=5, required=False)
@@ -196,7 +212,7 @@ def main():
 
     args = parser.parse_args()
     cleaner = BundleCleanerV2(args.input_fpath, args.output_fpath, verbose=args.verbose)
-    cleaner.run(args)
+    cleaner.run2(args)
 
 if __name__ == '__main__':
     main()

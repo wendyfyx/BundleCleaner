@@ -2,6 +2,7 @@
 data/
 notebook/
 plots/
+eval_figs/
 presentations/
 src/.ipynb_checkpoints/
 src/__pycache__/
