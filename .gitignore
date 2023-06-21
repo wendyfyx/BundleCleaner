@@ -4,6 +4,7 @@ notebook/
 plots/
 eval_figs/
 presentations/
+test_bundles/AF_L_recon*.trk
 src/.ipynb_checkpoints/
 src/__pycache__/
 src/.DS_Store

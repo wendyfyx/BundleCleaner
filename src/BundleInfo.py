@@ -9,6 +9,8 @@ import dipy
 from evals import binary_mask, bundle_density_map
 
 class BundleInfo:
+    '''Bundle shape metrics, as defined in [Yeh, 2020]'''
+
     def __init__(self, bundle_data, ref_image, voxel_size=2):
         self.voxel_size = voxel_size
         self.data = bundle_data

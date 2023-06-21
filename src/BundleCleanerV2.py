@@ -17,6 +17,7 @@ from utils import pc_to_arraysequence, qbcluster_labels, cluster_subsample, rand
 from BundleCleaner import BundleCleaner
 
 class BundleCleanerV2:
+
     def __init__(self, input_fpath, output_fpath, verbose=False):
         self.input_fpath = input_fpath          # example: data/bundle.trk
         self.output_fpath = output_fpath        # example: data/cleaned/bundle_proc.trk
@@ -152,7 +153,6 @@ class BundleCleanerV2:
 
     def run(self, args):
         '''Define BundleCleaner pipeline'''
-
         start = time.time()
 
         if len(self.lines_orig) < args.min_lines: # Only apply step 3 streamline based smoothing for small bundles
@@ -167,9 +167,9 @@ class BundleCleanerV2:
         self.time_elapsed = time.time()-start
         print(f"Total time elapsed {self.time_elapsed:.3f}.")
 
+
     def run2(self, args):
         '''Define BundleCleaner pipeline, save at every step'''
-
         start = time.time()
 
         if len(self.lines_orig) < args.min_lines: # Only apply step 3 streamline based smoothing for small bundles
@@ -212,7 +212,7 @@ def main():
 
     args = parser.parse_args()
     cleaner = BundleCleanerV2(args.input_fpath, args.output_fpath, verbose=args.verbose)
-    cleaner.run2(args)
+    cleaner.run(args)
 
 if __name__ == '__main__':
     main()

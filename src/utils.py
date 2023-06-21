@@ -153,7 +153,7 @@ def pc_to_arraysequence(pc, ptct):
 def random_select(data, n_sample=1, rng=None):
     '''
         Randomly select samples from data, returns index
-        Example usage: data[sample_idx(data)]
+        Example usage: data[random_select(data)]
     '''
     if rng is None:
         rng=np.random.default_rng(0)
