@@ -2,7 +2,7 @@
 data/
 notebook/
 plots/
-eval_figs/
+eval_figs/AF_L_recon*.png
 presentations/
 test_bundles/AF_L_recon*.trk
 src/.ipynb_checkpoints/
