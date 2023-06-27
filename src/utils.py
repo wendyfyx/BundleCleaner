@@ -115,7 +115,7 @@ def resample_lines_by_ptct(lines, ptct, verbose=True):
 
 def save_bundle(bundle, orig_fpath, new_fpath, verbose=True):
     if verbose:
-        print(f"Saving bundle ({len(bundle)} lines) to {new_fpath}.")
+        print(f"Saving bundle ({len(bundle)} lines, {len(bundle.get_data())} points) to {new_fpath}.")
     new_tractogram = StatefulTractogram(bundle, orig_fpath, Space.RASMM)
     save_tractogram(new_tractogram, new_fpath, bbox_valid_check=False)
 

@@ -86,7 +86,7 @@ class BundleCleanerV2:
         return self
 
 
-    def step3(self, window_size=10, poly_order=2, out_suffix=None, keep_same=False):
+    def step3(self, window_size=10, poly_order=2, out_suffix=None, resample_back=None):
         '''Step 3: Streamline based smoothing'''
 
         if self.verbose:
@@ -103,14 +103,15 @@ class BundleCleanerV2:
         # Save output
         self.lines_out = lines_out # don't resample back in case we want to 
         if out_suffix is not None:
-            if keep_same:
-                self.lines_out = resample_lines_by_percent(lines_out, percent=float(1)/self.resample_rate)
+            if resample_back is not None:
+                pct = float(resample_back) / self.resample_rate #float(1)/self.resample_rate
+                self.lines_out = resample_lines_by_percent(lines_out, percent=pct)
             save_bundle(self.lines_out, self.input_fpath, f"{self.output_fpath[:-4]}{out_suffix}.trk", verbose=self.verbose)
         return self
         
 
     def step4(self, threshold=5, min_samples=None, sample_pct=1, out_suffix="_cleaned", 
-              out_suffix_pruned=None, out_suffix_random=None, keep_same=False):
+              out_suffix_pruned=None, out_suffix_random=None, resample_back=None):
         '''Step 4: Final pruning and subsampling'''
 
         if self.verbose:
@@ -127,8 +128,9 @@ class BundleCleanerV2:
 
         # Save output
         if out_suffix is not None:
-            if keep_same:
-                self.lines_sampled = resample_lines_by_percent(self.lines_sampled, percent=float(1)/self.resample_rate)
+            if resample_back is not None:
+                pct = float(resample_back) / self.resample_rate #float(1)/self.resample_rate
+                self.lines_sampled = resample_lines_by_percent(self.lines_sampled, percent=pct)
             save_bundle(self.lines_sampled, self.input_fpath, f"{self.output_fpath[:-4]}{out_suffix}.trk", verbose=self.verbose)
 
         # Save random bundle subsampled from the original bundle with the same number of streamlines as lines_sampled (for comparison)
@@ -145,8 +147,9 @@ class BundleCleanerV2:
                                                         sample_pct=1, 
                                                         verbose=self.verbose)
             self.lines_pruned = self.lines_in[prune_idx]
-            if keep_same:
-                self.lines_pruned = resample_lines_by_percent(self.lines_pruned, percent=float(1)/self.resample_rate)
+            if resample_back:
+                pct = float(resample_back) / self.resample_rate #float(1)/self.resample_rate
+                self.lines_pruned = resample_lines_by_percent(self.lines_pruned, percent=pct)
             save_bundle(self.lines_pruned, self.input_fpath, f"{self.output_fpath[:-4]}{out_suffix_pruned}.trk", verbose=self.verbose)
         return self
 
@@ -156,12 +159,13 @@ class BundleCleanerV2:
         start = time.time()
 
         if len(self.lines_orig) < args.min_lines: # Only apply step 3 streamline based smoothing for small bundles
-            self.step3(args.window_size, args.poly_order, keep_same=args.keep_same, out_suffix="_cleaned")
+            self.step1(args.resample, min_samples=0, out_suffix=None) \
+                .step3(args.window_size, args.poly_order, resample_back=args.resample_back, out_suffix="_cleaned")
         else: # Define main pipeline
             self.step1(args.resample, args.prune_threshold, args.prune_min_samples, out_suffix=None) \
                 .step2(args.alpha, args.maxiter, args.n_neighbors, out_suffix=None) \
-                .step3(args.window_size, args.poly_order, keep_same=False, out_suffix=None) \
-                .step4(args.threshold, args.min_samples, args.sample_pct, keep_same=args.keep_same,
+                .step3(args.window_size, args.poly_order, resample_back=None, out_suffix=None) \
+                .step4(args.threshold, args.min_samples, args.sample_pct, resample_back=args.resample_back,
                     out_suffix="_cleaned", out_suffix_pruned="_pruned", out_suffix_random=None)
         
         self.time_elapsed = time.time()-start
@@ -173,12 +177,13 @@ class BundleCleanerV2:
         start = time.time()
 
         if len(self.lines_orig) < args.min_lines: # Only apply step 3 streamline based smoothing for small bundles
-            self.step3(args.window_size, args.poly_order, keep_same=args.keep_same, out_suffix="step3")
+            self.step1(args.resample, min_samples=0, out_suffix=None) \
+                .step3(args.window_size, args.poly_order, resample_back=args.resample_back, out_suffix="step3")
         else: # Define main pipeline
             self.step1(args.resample, args.prune_threshold, args.prune_min_samples, out_suffix='_step1') \
                 .step2(args.alpha, args.maxiter, args.n_neighbors, out_suffix='_step2') \
-                .step3(args.window_size, args.poly_order, keep_same=False, out_suffix='_step3') \
-                .step4(args.threshold, args.min_samples, args.sample_pct, keep_same=args.keep_same,
+                .step3(args.window_size, args.poly_order, resample_back=None, out_suffix='_step3') \
+                .step4(args.threshold, args.min_samples, args.sample_pct, resample_back=args.resample_back,
                     out_suffix="_step4_cleaned", out_suffix_pruned="_step4_pruned", out_suffix_random='_random')
         
         self.time_elapsed = time.time()-start
@@ -200,7 +205,7 @@ def main():
     parser.add_argument('--prune_min_samples', type=int, nargs='?', default=None, required=False)
     # Step 2 args
     parser.add_argument('--alpha', type=float, default=100.0, required=False)
-    parser.add_argument('--maxiter', type=int, default=5000, required=False)
+    parser.add_argument('--maxiter', type=int, default=3000, required=False)
     parser.add_argument('--n_neighbors', type=int, default=50, required=False)
     # Step 3 args
     parser.add_argument('--window_size', type=int, default=5, required=False)
@@ -209,6 +214,7 @@ def main():
     parser.add_argument('--threshold', type=float, default=5.0, required=False)
     parser.add_argument('--min_samples', type=int, nargs='?', default=None, required=False)
     parser.add_argument('--sample_pct', type=float, default=0.5, required=False)
+    parser.add_argument('--resample_back', type=float, default=1, required=False)
 
     args = parser.parse_args()
     cleaner = BundleCleanerV2(args.input_fpath, args.output_fpath, verbose=args.verbose)

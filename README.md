@@ -4,25 +4,24 @@
 
 ## Running *BundleCleaner* 
 - To run with default parameters, `python src/BundleCleanerV2.py -i test_bundles/AF_L.trk -o test_bundles/AF_L_proc.trk -v`.
-To resample the streamlines back after cleaning, use the `-s` flag.
-- Python implementation of select bundle shape metrics defined in [1] are available in `src/BundleInfo.py` for comparison.
+- Python implementation of select bundle shape metrics defined in DSI Studio [1] are available at `src/BundleInfo.py` ([original implementation](https://github.com/frankyeh/DSI-Studio/blob/fd7a5e8623caf48690fb16f40f6a1ae9ebffd73c/libs/tracking/tract_model.cpp#L2791)).
 - Sample bundle from [processed PPMI data](https://nih.figshare.com/articles/dataset/DIPY_Processed_Parkinson_s_Progression_Markers_Initiative_PPMI_Data_Derivatives/12033390) is provided at `test_bundles/AF_L.trk`.
 
 <div style="display: flex">
-<figure>
-  <img
-  src="eval_figs/AF_L_orig_lines.png"
-  alt="Before Cleaning"
-  width="300">
-  <figcaption>AF_L before cleaning</figcaption>
-</figure>
-<figure>
-  <img
-  src="eval_figs/AF_L_step4_cleaned_lines.png"
-  alt="After Cleaning"
-  width="300">
-  <figcaption>AF_L after cleaning</figcaption>
-</figure>
+  <div>
+    <img
+    src="eval_figs/AF_L_orig_lines.png"
+    alt="Before Cleaning"
+    width="300">
+    <figcaption>AF_L before cleaning</figcaption>
+  </div>
+  <div>
+    <img
+    src="eval_figs/AF_L_step4_cleaned_lines.png"
+    alt="After Cleaning"
+    width="300">
+    <figcaption>AF_L after cleaning</figcaption>
+  </div>
 </div>
 
 ## References
