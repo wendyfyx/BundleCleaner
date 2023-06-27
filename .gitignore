@@ -1,9 +1,11 @@
+.gitignore
 .DS_Store
 data/
 notebook/
 plots/
-eval_figs/AF_L_recon*.png
 presentations/
+eval_figs/AF_L_recon*.png
+eval_figs/AF_L_step*.png
 test_bundles/AF_L_recon*.trk
 src/.ipynb_checkpoints/
 src/__pycache__/

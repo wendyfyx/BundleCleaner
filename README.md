@@ -3,9 +3,10 @@
 *Author*: Yixue Feng
 
 ## Running *BundleCleaner* 
-- To run with default parameters, `python src/BundleCleanerV2.py -i test_bundles/AF_L.trk -o test_bundles/AF_L_proc.trk -v`.
+- Create conda environment using `conda env create -f environment.yml`.
+- Run *BundleCleaner* with the default parameters, `python src/BundleCleanerV2.py -i test_bundles/AF_L.trk -o test_bundles/AF_L_proc.trk`. Add `-v` flag for verbose output.
 - Python implementation of select bundle shape metrics defined in DSI Studio [1] are available at `src/BundleInfo.py` ([original implementation](https://github.com/frankyeh/DSI-Studio/blob/fd7a5e8623caf48690fb16f40f6a1ae9ebffd73c/libs/tracking/tract_model.cpp#L2791)).
-- Sample bundle from [processed PPMI data](https://nih.figshare.com/articles/dataset/DIPY_Processed_Parkinson_s_Progression_Markers_Initiative_PPMI_Data_Derivatives/12033390) is provided at `test_bundles/AF_L.trk`.
+- Sample bundle from [processed PPMI data](https://nih.figshare.com/articles/dataset/DIPY_Processed_Parkinson_s_Progression_Markers_Initiative_PPMI_Data_Derivatives/12033390) for testing is provided at `test_bundles/AF_L.trk`.
 
 <div style="display: flex">
   <div>
