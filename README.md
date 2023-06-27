@@ -13,15 +13,15 @@
     src="eval_figs/AF_L_orig_lines.png"
     alt="Before Cleaning"
     width="300">
-    <figcaption>AF_L before cleaning</figcaption>
   </div>
+  <figcaption>AF_L before cleaning</figcaption>
   <div>
     <img
     src="eval_figs/AF_L_step4_cleaned_lines.png"
     alt="After Cleaning"
     width="300">
-    <figcaption>AF_L after cleaning</figcaption>
   </div>
+  <figcaption>AF_L after cleaning</figcaption>
 </div>
 
 ## References
