@@ -26,6 +26,7 @@
 </div>
 
 ## Cite our work
+This work was accepted to the MICCAI 2023 CDMRI workshop. Preprint available at https://www.biorxiv.org/content/10.1101/2023.08.19.553990v1.
 ```
 @misc{feng_bundlecleaner_2023,
 	title = {{BundleCleaner}: {Unsupervised} {Denoising} and {Subsampling} of {Diffusion} {MRI}-{Derived} {Tractography} {Data}},
