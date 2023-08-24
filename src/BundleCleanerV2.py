@@ -194,8 +194,6 @@ def main():
     parser.add_argument('--input_fpath', '-i', type=str, required=True)
     parser.add_argument('--output_fpath', '-o', type=str, required=True)
     parser.add_argument('--verbose', '-v', action='store_true')
-    parser.add_argument('--keep_same', '-s', action='store_true', 
-                        help="Resample back to keep the same number of points per streamline if resample rate < 1. Only for final bundles saved.")
     parser.add_argument('--min_lines', '-M', type=int, default=50, required=False, 
                         help='Minimum number of lines for Laplacian smoothing & sampling')
 

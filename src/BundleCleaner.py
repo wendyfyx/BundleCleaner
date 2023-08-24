@@ -2,6 +2,7 @@ import time
 import scipy
 import numpy as np
 import robust_laplacian
+from kneed import KneeLocator
 from collections import Counter
 from scipy.signal import savgol_filter
 
@@ -110,6 +111,13 @@ class BundleCleaner:
             print(f"Streamline smoothing: window size={window_size}, order={poly_order}.")
         lines_smoothed = [savgol_filter(lines[i], window_size, poly_order, axis=0) for i in range(len(lines))]
         return ArraySequence(lines_smoothed)
+
+    @staticmethod
+    def cluster_threshold_elbow(labels):
+        count = Counter(labels).most_common()
+        count = [i[1] for i in count]
+        kn = KneeLocator(np.arange(len(count)), count, curve='convex', direction='decreasing')
+        return kn.knee
     
     @staticmethod
     def subsampling(lines, threshold=5, min_samples=None, sample_pct=0.5, verbose=True, **kwargs):
@@ -122,6 +130,7 @@ class BundleCleaner:
         
         if min_samples is None: # default to median cluster size and no more than 100
             min_samples = np.percentile(np.array(list(Counter(labels).values())), 50)
+            # min_samples = BundleCleaner.cluster_threshold_elbow(labels)
             min_samples = min(min_samples, 100)
         sample_idx = cluster_subsample(labels, sample_pct=sample_pct, min_samples=min_samples)
         if verbose:

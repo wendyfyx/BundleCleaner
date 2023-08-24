@@ -7,6 +7,7 @@ presentations/
 eval_figs/AF_L_recon*.png
 eval_figs/AF_L_step*.png
 test_bundles/AF_L_recon*.trk
+test_bundles/AF_L_proc_fiberneat.trk
 src/.ipynb_checkpoints/
 src/__pycache__/
 src/.DS_Store

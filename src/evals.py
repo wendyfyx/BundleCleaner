@@ -53,9 +53,9 @@ def dice(map1, map2):
     return np.sum(intersection)*2.0 / (np.sum(mask1) + np.sum(mask2))
 
 
-def coverage(map1, map2):
+def overlap(map1, map2):
     '''
-        Returns the coverage for two volumes of the same size, the fraction of 
+        Returns the overlap for two volumes of the same size, the fraction of 
         volume in map1 overlapping with map2, and the fraction of volume in map2 
         overlapping with map1.
     '''
@@ -64,3 +64,14 @@ def coverage(map1, map2):
     mask2 = binary_mask(map2)
     intersection = np.logical_and(mask1, mask2)
     return np.sum(intersection) / np.sum(mask1), np.sum(intersection) / np.sum(mask2)
+
+def overreach(map1, map2):
+    assert map1.shape==map2.shape, "Shape mismatch"
+    mask1 = binary_mask(map1)
+    mask2 = binary_mask(map2)
+    intersection = np.logical_and(mask1, mask2)
+    or1 = (np.count_nonzero(mask1)-np.count_nonzero(intersection))/np.count_nonzero(mask2)
+    or1_self = (np.count_nonzero(mask1)-np.count_nonzero(intersection))/np.count_nonzero(mask1)
+    or2 = (np.count_nonzero(mask2)-np.count_nonzero(intersection))/np.count_nonzero(mask1)
+    or2_self = (np.count_nonzero(mask2)-np.count_nonzero(intersection))/np.count_nonzero(mask2)
+    return or1, or1_self, or2, or2_self

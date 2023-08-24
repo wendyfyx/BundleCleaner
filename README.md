@@ -1,4 +1,4 @@
-# *BundleCleaner*: Point-cloud based denoising and subsampling of tractography data
+# *BundleCleaner*: Unsupervised Denoising and Subsampling of Tractography Data
 
 *Author*: Yixue Feng
 
@@ -24,6 +24,25 @@
   </div>
   <figcaption>AF_L after cleaning</figcaption>
 </div>
+
+## Cite our work
+```
+@misc{feng_bundlecleaner_2023,
+	title = {{BundleCleaner}: {Unsupervised} {Denoising} and {Subsampling} of {Diffusion} {MRI}-{Derived} {Tractography} {Data}},
+	copyright = {All rights reserved},
+	shorttitle = {{BundleCleaner}},
+	url = {https://www.biorxiv.org/content/10.1101/2023.08.19.553990v1},
+	doi = {10.1101/2023.08.19.553990},
+	language = {en},
+	urldate = {2023-08-21},
+	publisher = {bioRxiv},
+	author = {Feng, Yixue and Chandio, Bramsh Q. and Villalon-Reina, Julio E. and Thomopoulos, Sophia I. and Joshi, Himanshu and Nair, Gauthami and Joshi, Anand A. and Venkatasubramanian, Ganesan and John, John P. and Thompson, Paul M.},
+	month = aug,
+	year = {2023},
+  note = {Accepted to MICCAI 2023 CDMRI Workshop.}
+}
+
+```
 
 ## References
 [1] F.-C. Yeh, “Shape analysis of the human association pathways,” NeuroImage, vol. 223, p. 117329, Dec. 2020, doi: [10.1016/j.neuroimage.2020.117329](https://linkinghub.elsevier.com/retrieve/pii/S1053811920308156).
