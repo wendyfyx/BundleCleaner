@@ -147,7 +147,7 @@ class BundleCleanerV2:
                                                         sample_pct=1, 
                                                         verbose=self.verbose)
             self.lines_pruned = self.lines_in[prune_idx]
-            if resample_back:
+            if resample_back is not None:
                 pct = float(resample_back) / self.resample_rate #float(1)/self.resample_rate
                 self.lines_pruned = resample_lines_by_percent(self.lines_pruned, percent=pct)
             save_bundle(self.lines_pruned, self.input_fpath, f"{self.output_fpath[:-4]}{out_suffix_pruned}.trk", verbose=self.verbose)
@@ -165,7 +165,7 @@ class BundleCleanerV2:
             self.step1(args.resample, args.prune_threshold, args.prune_min_samples, out_suffix=None) \
                 .step2(args.alpha, args.maxiter, args.n_neighbors, out_suffix=None) \
                 .step3(args.window_size, args.poly_order, resample_back=None, out_suffix=None) \
-                .step4(args.threshold, args.min_samples, args.sample_pct, resample_back=args.resample_back,
+                .step4(args.threshold, args.min_samples, args.subsample, resample_back=args.resample_back,
                     out_suffix="_cleaned", out_suffix_pruned="_pruned", out_suffix_random=None)
         
         self.time_elapsed = time.time()-start
@@ -183,36 +183,49 @@ class BundleCleanerV2:
             self.step1(args.resample, args.prune_threshold, args.prune_min_samples, out_suffix='_step1') \
                 .step2(args.alpha, args.maxiter, args.n_neighbors, out_suffix='_step2') \
                 .step3(args.window_size, args.poly_order, resample_back=None, out_suffix='_step3') \
-                .step4(args.threshold, args.min_samples, args.sample_pct, resample_back=args.resample_back,
+                .step4(args.threshold, args.min_samples, args.subsample, resample_back=args.resample_back,
                     out_suffix="_step4_cleaned", out_suffix_pruned="_step4_pruned", out_suffix_random='_random')
         
         self.time_elapsed = time.time()-start
         print(f"Total time elapsed {self.time_elapsed:.3f}.")
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--input_fpath', '-i', type=str, required=True)
     parser.add_argument('--output_fpath', '-o', type=str, required=True)
     parser.add_argument('--verbose', '-v', action='store_true')
     parser.add_argument('--min_lines', '-M', type=int, default=50, required=False, 
-                        help='Minimum number of lines for Laplacian smoothing & sampling')
+                        help='Minimum number of streamlines to apply Laplacian smoothing & sampling.')
 
     # Step 1 args
-    parser.add_argument('--resample', type=float, default=0.5, required=False)
-    parser.add_argument('--prune_threshold', type=float, default=5.0, required=False)
-    parser.add_argument('--prune_min_samples', type=int, nargs='?', default=None, required=False)
+    parser.add_argument('--resample', '-Sr', type=float, default=0.5, required=False, 
+                        help='Resampling rate in Step 1, to resample each streamlines to x%%%% of points.')
+    parser.add_argument('--prune_threshold', '-D1', type=float, default=5.0, required=False, 
+                        help='Distance threshold in Step 1, used in QuickBundles clustering.')
+    parser.add_argument('--prune_min_samples', '-C1', type=int, nargs='?', default=None, required=False,
+                        help='Minimum cluster size in Step 1. Clusters smaller than the specified value are discarded.')
     # Step 2 args
-    parser.add_argument('--alpha', type=float, default=100.0, required=False)
-    parser.add_argument('--maxiter', type=int, default=3000, required=False)
-    parser.add_argument('--n_neighbors', type=int, default=50, required=False)
+    parser.add_argument('--alpha', '-a', type=float, default=100.0, required=False,
+                        help='Smoothing parameter in Step 2, used in point-cloud based smoothing. Larger value applies more smoothing.')
+    parser.add_argument('--maxiter', type=int, default=3000, required=False, 
+                        help='Max iteration in Step 2, used for point-cloud based smoothing.')
+    parser.add_argument('--n_neighbors', '-K', type=int, default=50, required=False,
+                        help='Number of neighbors in Step 2, for building point-cloud triangulation.')
     # Step 3 args
-    parser.add_argument('--window_size', type=int, default=5, required=False)
-    parser.add_argument('--poly_order', type=int, default=2, required=False)
+    parser.add_argument('--window_size', '-W', type=int, default=5, required=False,
+                        help='Window size in Step 3, used in streamline-based smoothing. Larger value applies more smoothing.')
+    parser.add_argument('--poly_order', type=int, default=2, required=False,
+                        help='Polynomial order in Step 3, used in streamline-based smoothing.')
     # Step 4 args
-    parser.add_argument('--threshold', type=float, default=5.0, required=False)
-    parser.add_argument('--min_samples', type=int, nargs='?', default=None, required=False)
-    parser.add_argument('--sample_pct', type=float, default=0.5, required=False)
-    parser.add_argument('--resample_back', type=float, default=1, required=False)
+    parser.add_argument('--threshold', '-D2', type=float, default=5.0, required=False, 
+                        help='Distance threshold in Step 4, used in QuickBundles clustering.')
+    parser.add_argument('--min_samples', '-C2', type=int, nargs='?', default=None, required=False,
+                        help='Minimum cluster size in Step 4. Clusters smaller than the specified value are discarded.')
+    parser.add_argument('--subsample', '-S', type=float, default=0.5, required=False,
+                        help='Subsampling rate in Step 4, to subsample x%%%% streamlines from each remaining clusters after pruning.')
+    
+    parser.add_argument('--resample_back', type=float, default=None, required=False, 
+                        help='Resample each streamline back to the original number of points.')
 
     args = parser.parse_args()
     cleaner = BundleCleanerV2(args.input_fpath, args.output_fpath, verbose=args.verbose)
